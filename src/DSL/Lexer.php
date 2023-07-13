@@ -12,10 +12,27 @@ final class Lexer {
     public const VALID_ESCAPE_CHARACTERS = ["\"", "\\"];
 
     /**
+     * Check string is valid JSON-document
+     *
+     * @param string $string
+     *
+     * @return false|array
+     */
+    protected static function __stringIsJSON(string $string) : false|array {
+        if (empty($string) === true) {
+            return false;
+        }
+
+        $data = @json_decode($string, true);
+
+        return is_array($data) === true ? $data : false;
+    }
+
+    /**
      * Parse code
      *
      * @param string $code        Code string
-     * @param bool   $useTypeCast cast numeric, boolean, null value or not
+     * @param bool   $useTypeCast cast array, numeric, boolean, null value or not
      *
      * @return array
      *
@@ -119,6 +136,8 @@ final class Lexer {
                                     } else if ($instructionParameter == (int) $instructionParameter) {
                                         $instructionParameter = (int) $instructionParameter;
                                     }
+                                } else if (($json = static::__stringIsJSON($instructionParameter)) !== false) {
+                                    $instructionParameter = $json;
                                 } else {
                                     $instructionParameter = match ($instructionParameter) {
                                         default => $instructionParameter,
