@@ -32,18 +32,46 @@ final class Lexer {
      * Parse code
      *
      * @param string $code        Code string
-     * @param bool   $useTypeCast cast array, numeric, boolean, null value or not
+     * @param bool   $useTypeCast cast array, numeric(detect float only with non-zero value after point), boolean, null value or not
      *
      * @return array
      *
      * @throws \Exception\DSL\InstructionsFile\ParseFail
      */
     public static function parse(string $code, bool $useTypeCast = false) : array {
-        $instructions = [];
+        $entityInstructions = [];
 
         try {
             $_instructions = array_map("trim", explode("\n", str_replace("\r", '', $code)));
+            $previousEntityName = null;
+            $currentEntityName = null;
+            $instructions = [];
             for ($row = 0; $row < count($_instructions); $row++) {
+                if (preg_match("/\A(#[a-zA-Z_0-9]{3,})\Z/", $_instructions[$row]) === 1) {
+                    $previousEntityName = $currentEntityName;
+                    $currentEntityName = str_replace("#", '', $_instructions[$row]);
+
+                    // TODO: check entity on exists
+
+                    if ($row !== 0) {
+                        if (count($instructions) === 0) {
+                            throw new \Exception(message: "Can't define new Entity '{$currentEntityName}' at " . ($row + 1) . " while not call some methods for previously Entity '{$previousEntityName}'", code: 409);
+                        }
+
+                        $entityInstructions[] = [
+                            "methods"      => $previousEntityName,
+                            "instructions" => $instructions,
+                        ];
+
+                        $instructions = [];
+                    }
+
+                    continue;
+                } else if ($row === 0) {
+                    throw new \Exception(message: "Don't defined Entity");
+                }
+
+
                 $tokens = mb_str_split($_instructions[$row]);
 
                 $inputLength = count($tokens);
@@ -131,10 +159,10 @@ final class Lexer {
 
                             if ($useTypeCast === true) {
                                 if (is_numeric($instructionParameter) === true) {
-                                    if ($instructionParameter == (float) $instructionParameter) {
-                                        $instructionParameter = (float) $instructionParameter;
-                                    } else if ($instructionParameter == (int) $instructionParameter) {
+                                    if ($instructionParameter == (int) $instructionParameter) {
                                         $instructionParameter = (int) $instructionParameter;
+                                    } else if ($instructionParameter == (float) $instructionParameter) {
+                                        $instructionParameter = (float) $instructionParameter;
                                     }
                                 } else if (($json = static::__stringIsJSON($instructionParameter)) !== false) {
                                     $instructionParameter = $json;
@@ -183,9 +211,10 @@ final class Lexer {
                         }
 
                         $currentPart = trim($currentPart);
-                        if (\DSL\Operation\Available::operationNameDefined($currentPart) === false) {
+                        // TODO: check method on exists on defined Entity
+                        /*if (\DSL\Operation\Available::operationNameDefined($currentPart) === false) {
                             throw new \Exception\DSL\Operation\Unknown("'{$currentPart}' at " . ($row + 1) . " line");
-                        }
+                        }*/
                         $operationName = $currentPart;
 
                         $currentPart = '';
@@ -197,15 +226,24 @@ final class Lexer {
 
                     $currentPart .= $current;
                 }
-
-
             }
+            if (count($instructions) === 0) {
+                throw new \Exception(message: "Can't define new Entity '{$currentEntityName}' at " . ($row + 1) . " with no some method calls", code: 409);
+            }
+
+            $entityInstructions[] = [
+                "methods"      => $currentEntityName,
+                "instructions" => $instructions,
+            ];
         } catch (\Exception $e) {
             echo "> FAIL: {$e->getMessage()}\n";
             exit();
             throw new \Exception\DSL\InstructionsFile\ParseFail(message: "Parse failed", previous: $e);
         }
 
-        return $instructions;
+        var_export($entityInstructions);
+        exit();
+
+        return $entityInstructions;
     }
 }

@@ -2,7 +2,7 @@
 
 final class DSL {
     /**
-     * Use cast for array, numeric, boolean, null parameters or not
+     * Use cast for array, numeric(detect float only with non-zero value after point), boolean, null parameters or not
      *
      * @var bool
      */
@@ -26,11 +26,11 @@ final class DSL {
     public static function init() : static { return new static(); }
 
     /**
-     * Set flag - use cast for array, numeric, boolean, null parameters or not
+     * Set flag - use cast for array, numeric(detect float only with non-zero value after point), boolean, null parameters or not
      *
      * @param bool $useTypeCast
      *
-     * @return $this
+     * @return static
      */
     public function useTypeCast(bool $useTypeCast) : static {
         $this->_useTypeCast = $useTypeCast;
@@ -39,7 +39,7 @@ final class DSL {
     }
 
     /**
-     * Get flag - used cast for array, numeric, boolean, null parameters or not
+     * Get flag - used cast for array, numeric(detect float only with non-zero value after point), boolean, null parameters or not
      *
      * @return bool
      */

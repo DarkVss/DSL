@@ -1,2 +1,5 @@
+#entiTY
 where(name, =, "Singe (, | quote: \"h'gh",false,"{\"dasdasdasd\":123,\"234234234\":true,\"32rd\":\"ewds\",\"rgfdgf\":false}")
-    where     (name, =, 12\3 ,\"4123rweftewfsdef2",  null , "",     0333.43      ,true ,"dasdasd" )
+    whereX     (name, =, 12\3 ,\"4123rweftewfsdef2",  null , "",     -0333.43      ,true ,"dasdasd" )
+#newen
+new(+123,-123.1)
