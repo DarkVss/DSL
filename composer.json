@@ -1,7 +1,7 @@
 {
   "name"        : "darkvss/dsl",
   "description" : "Basic DSL library",
-  "version"     : "0.1.0",
+  "version"     : "0.8.0",
   "autoload"    : {
     "psr-4" : {
       "" : "src/"

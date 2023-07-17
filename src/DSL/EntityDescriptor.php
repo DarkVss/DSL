@@ -46,13 +46,14 @@ final class EntityDescriptor {
             $reflector = new \ReflectionClass($this->_classname);
 
             $this->_comment = \DSL\Helpers::extractDocComment($reflector->getDocComment() ?: '') ?? "### Entity have no description ###";
-            $methods = array_map(
-                fn(\ReflectionMethod $method) => \DSL\EntityDescriptor\Method::parse($method),
-                array_filter(
-                    $reflector->getMethods(\ReflectionMethod::IS_PUBLIC),
-                    fn(\ReflectionMethod $method) => preg_match("/\A" . \DSL\EntityDescriptor\Method::METHOD_NAME_BEGIN . "[a-zA-Z_0-9]+\z/", $method->getName()) === 1
-                )
+            $methods = array_filter(
+                $reflector->getMethods(\ReflectionMethod::IS_PUBLIC),
+                fn(\ReflectionMethod $method) => preg_match("/\A" . \DSL\EntityDescriptor\Method::METHOD_NAME_BEGIN . "[a-zA-Z_0-9]+\z/", $method->getName()) === 1
             );
+            if (count($methods) === 0) {
+                throw new \Exception\DSL\Entity\NoMethods(message: static::EntityName() . " have no one methods", code: 500);
+            }
+            $methods = array_map(fn(\ReflectionMethod $method) => \DSL\EntityDescriptor\Method::parse($method), $methods);
             $this->_methods = array_combine(
                 array_map(fn(\DSL\EntityDescriptor\Method $method) => $method->Name(), $methods),
                 $methods
@@ -100,7 +101,7 @@ final class EntityDescriptor {
 
         $entity = static::Classname()::new();
         foreach ($methods as $method) {
-            $entity->{$this->_methods[$method["name"]]->Name(false)}(...$method["parameters"]);
+            $entity = $entity->{$this->_methods[$method["name"]]->Name(false)}(...$method["parameters"]);
         }
 
         return $entity->apply();

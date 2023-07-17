@@ -2,4 +2,4 @@
 
 namespace Exception\DSL\EntityDescriptor;
 
-class NotSubClass extends \Exception\DSL\EntityDescriptor { }
+final class NotSubClass extends \Exception\DSL\EntityDescriptor { }
