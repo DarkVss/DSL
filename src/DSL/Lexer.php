@@ -51,7 +51,9 @@ final class Lexer {
                     $previousEntityName = $currentEntityName;
                     $currentEntityName = str_replace("#", '', $_instructions[$row]);
 
-                    // TODO: check entity on exists
+                    if (\DSL\Entity\Pool::Instance()->isDefinedEntity($currentEntityName) === false) {
+                        throw new \Exception\DSL\Operation\Unknown("unknown entity `{$currentEntityName}`");
+                    }
 
                     if ($row !== 0) {
                         if (count($instructions) === 0) {
@@ -59,8 +61,8 @@ final class Lexer {
                         }
 
                         $entityInstructions[] = [
-                            "methods"      => $previousEntityName,
-                            "instructions" => $instructions,
+                            "entity"  => $previousEntityName,
+                            "methods" => $instructions,
                         ];
 
                         $instructions = [];
@@ -179,7 +181,7 @@ final class Lexer {
                         unset($instructionParameter);
 
                         $instructions[] = [
-                            "operation"  => $operationName,
+                            "name"       => $operationName,
                             "parameters" => $instructionParameters,
                         ];
 
@@ -212,9 +214,9 @@ final class Lexer {
 
                         $currentPart = trim($currentPart);
                         // TODO: check method on exists on defined Entity
-                        /*if (\DSL\Operation\Available::operationNameDefined($currentPart) === false) {
+                        if (\DSL\Entity\Pool::Instance()->isDefinedEntityMethod($currentEntityName,$currentPart) === false) {
                             throw new \Exception\DSL\Operation\Unknown("'{$currentPart}' at " . ($row + 1) . " line");
-                        }*/
+                        }
                         $operationName = $currentPart;
 
                         $currentPart = '';
@@ -232,8 +234,8 @@ final class Lexer {
             }
 
             $entityInstructions[] = [
-                "methods"      => $currentEntityName,
-                "instructions" => $instructions,
+                "entity"  => $currentEntityName,
+                "methods" => $instructions,
             ];
         } catch (\Exception $e) {
             echo "> FAIL: {$e->getMessage()}\n";

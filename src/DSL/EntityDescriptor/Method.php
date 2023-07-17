@@ -38,4 +38,18 @@ final class Method {
         return $instance;
     }
 
+    /**
+     * @return string
+     */
+    public function Name() : string { return $this->_name; }
+
+    /**
+     * @return string
+     */
+    public function Comment() : string { return $this->_comment; }
+
+    /**
+     * @return array
+     */
+    public function Parameters() : array { return $this->_parameters; }
 }

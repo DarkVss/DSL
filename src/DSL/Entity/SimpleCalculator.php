@@ -9,6 +9,13 @@ class SimpleCalculator extends \DSL\Entity {
     protected float|int $_result = 0;
 
     /**
+     * Calculation result
+     *
+     * @return float|int
+     */
+    public function method__apply() : float|int { return $this->_result; }
+
+    /**
      * Adds the current value of the expression and the passed number
      *
      * @param float|int $value

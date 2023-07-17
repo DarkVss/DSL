@@ -21,5 +21,12 @@ abstract class Entity {
      *
      * @throws \Exception
      */
-    final public static function getDescription() : \DSL\EntityDescriptor { return \DSL\EntityDescriptor::generate(static::class); }
+    final public static function getDescription() : \DSL\EntityDescriptor { return \DSL\EntityDescriptor::generate(static::class); } // TODO: wrong versions
+
+    /**
+     * Method for finalization
+     *
+     * @return mixed
+     */
+    abstract public function method__apply():mixed;
 }
