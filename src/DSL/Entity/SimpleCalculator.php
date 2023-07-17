@@ -13,7 +13,7 @@ class SimpleCalculator extends \DSL\Entity {
      *
      * @return float|int
      */
-    public function method__apply() : float|int { return $this->_result; }
+    public function apply() : float|int { return $this->_result; }
 
     /**
      * Adds the current value of the expression and the passed number
@@ -36,7 +36,7 @@ class SimpleCalculator extends \DSL\Entity {
      * @return static
      */
     public function method__minus(float|int $value) : static {
-        $this->_result /= $value;
+        $this->_result -= $value;
 
         return static::__return();
     }

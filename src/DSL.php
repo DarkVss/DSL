@@ -116,16 +116,18 @@ final class DSL {
             throw new \Exception\DSL\Instruction\NotSet();
         }
 
+        $result = [];
         $instructionIndex = 0;
 
         try {
             for (; $instructionIndex < count($this->_instructions); $instructionIndex++) {
-                \DSL\Operation\Available::getOperationClassByOperationName($this->_instructions[$instructionIndex]["operation"])::execute($this->_instructions[$instructionIndex]["parameters"]);
+                $result[] = \DSL\Entity\Pool::Instance()->tryToExecute($this->_instructions[$instructionIndex]["entity"], $this->_instructions[$instructionIndex]["methods"]);
+
             }
         } catch (\Exception $e) {
-            throw new \Exception\DSL\Instruction\Fail("Failed execution instruction at #" . ($instructionIndex + 1) . " - '{$this->_instructions[$instructionIndex]["operation"]}'", previous: $e);
+            throw new \Exception\DSL\Instruction\Fail("Failed execution instruction at #" . ($instructionIndex + 1) . " entity - '{$this->_instructions[$instructionIndex]["operation"]}'", previous: $e);
         }
 
-        return [];
+        return $result;
     }
 }

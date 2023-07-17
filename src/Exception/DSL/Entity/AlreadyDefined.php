@@ -1,5 +1,5 @@
 <?php
 
-namespace Exception\DSL\Operation;
+namespace Exception\DSL\Entity;
 
 final class AlreadyDefined extends \Exception\DSL { }

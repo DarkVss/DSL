@@ -28,5 +28,5 @@ abstract class Entity {
      *
      * @return mixed
      */
-    abstract public function method__apply():mixed;
+    abstract public function apply() : mixed;
 }

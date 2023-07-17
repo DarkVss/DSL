@@ -8,11 +8,10 @@ require_once RUN_PATH . "vendor/autoload.php";
 $instructionsFile = RUN_PATH . "instructionsExample.txt";
 
 try {
-    var_dump(
-        \DSL::init()
+        var_dump(\DSL::init()
             ->useTypeCast(true)
             ->parseFile($instructionsFile)
-    );
+            ->run());
 } catch (\Exception\DSL $e) {
     echo "> Library exception: {$e->getMessage()}\n\t{$e->getFile()}::{$e->getLine()}\n";
 } catch (\Exception $e) {

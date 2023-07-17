@@ -39,9 +39,11 @@ final class Method {
     }
 
     /**
+     * @param bool $short
+     *
      * @return string
      */
-    public function Name() : string { return $this->_name; }
+    public function Name(bool $short = true) : string { return ($short === true ? '' : static::METHOD_NAME_BEGIN) . $this->_name; }
 
     /**
      * @return string

@@ -27,12 +27,12 @@ final class Available {
      *
      * @return string|static return Available class name for chaining call
      *
-     * @throws \Exception\DSL\Operation\AlreadyDefined
+     * @throws \Exception\DSL\Entity\AlreadyDefined
      */
     public static function addOperator(\DSL\Operation ...$operatorClass) : string|static {
         foreach ($operatorClass as $_operatorClass) {
             if (static::operationClassDefined($_operatorClass) === true) {
-                throw new \Exception\DSL\Operation\AlreadyDefined();
+                throw new \Exception\DSL\Entity\AlreadyDefined();
             }
 
             static::$_classes[$_operatorClass::NAME()] = $_operatorClass;
@@ -104,9 +104,9 @@ final class Available {
      *
      * @return \DSL\Operation
      *
-     * @throws \Exception\DSL\Operation\Unknown
+     * @throws \Exception\DSL\Entity\Unknown
      */
     public static function getOperationClassByOperationName(string $operationName) : \DSL\Operation {
-        return static::$_classes[$operationName] ?? throw new \Exception\DSL\Operation\Unknown(message: $operationName);
+        return static::$_classes[$operationName] ?? throw new \Exception\DSL\Entity\Unknown(message: $operationName);
     }
 }

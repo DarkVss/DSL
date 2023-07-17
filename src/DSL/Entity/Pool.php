@@ -40,17 +40,17 @@ final class Pool {
      *
      * @return static
      *
-     * @throws \Exception\DSL\Operation\AlreadyDefined
+     * @throws \Exception\DSL\Entity\AlreadyDefined
      * @throws \Exception
      */
     public function addEntity(\DSL\Entity|string ...$entities) : static {
         foreach ($entities as $entity) {
             if (static::isDefinedEntity($entity) === true) {
-                throw new \Exception\DSL\Operation\AlreadyDefined();
+                throw new \Exception\DSL\Entity\AlreadyDefined();
             }
 
             $entityDescriptor = \DSL\EntityDescriptor::generate($entity);
-            $this->_entityDescriptors[$entityDescriptor->EntityName()] =$entityDescriptor ;
+            $this->_entityDescriptors[$entityDescriptor->EntityName()] = $entityDescriptor;
         }
 
         return static::__return();
@@ -66,7 +66,7 @@ final class Pool {
     public function reset() : static {
         foreach (static::DEFAULT_ENTITIES as $entity) {
             $entityDescriptor = \DSL\EntityDescriptor::generate($entity);
-            $this->_entityDescriptors[$entityDescriptor->EntityName()] =$entityDescriptor ;
+            $this->_entityDescriptors[$entityDescriptor->EntityName()] = $entityDescriptor;
         }
 
         return static::__return();
@@ -89,7 +89,7 @@ final class Pool {
      *
      * @return bool
      */
-    public function isDefinedEntityMethod(string $entity,string $method) : bool { return $this->_entityDescriptors[$entity]?->hasMethod($method) ?? false; }
+    public function isDefinedEntityMethod(string $entity, ?string $method) : bool { return $this->_entityDescriptors[$entity]?->hasMethod($method) ?? false; }
 
     /**
      * Get available operator classes
@@ -97,4 +97,22 @@ final class Pool {
      * @return \DSL\EntityDescriptor[]
      */
     public function DefinedEntities() : array { return array_values($this->_entityDescriptors); }
+
+    /**
+     * @param string|\DSL\Entity $entity
+     * @param array              $methods
+     *
+     * @return mixed
+     *
+     * @throws \Exception\DSL\Entity\Unknown
+     */
+    public function tryToExecute(string|\DSL\Entity $entity, array $methods) : mixed {
+        if (static::isDefinedEntity($entity) === false) {
+            throw new \Exception\DSL\Entity\Unknown("Unknown entity `{$entity}`");
+        }
+
+        $entityDescriptor = $this->_entityDescriptors[$entity];
+
+        return $entityDescriptor->tryToExecute($methods);
+    }
 }

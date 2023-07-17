@@ -52,12 +52,12 @@ final class Lexer {
                     $currentEntityName = str_replace("#", '', $_instructions[$row]);
 
                     if (\DSL\Entity\Pool::Instance()->isDefinedEntity($currentEntityName) === false) {
-                        throw new \Exception\DSL\Operation\Unknown("unknown entity `{$currentEntityName}`");
+                        throw new \Exception\DSL\Entity\Unknown("Unknown entity `{$currentEntityName}`");
                     }
 
                     if ($row !== 0) {
                         if (count($instructions) === 0) {
-                            throw new \Exception(message: "Can't define new Entity '{$currentEntityName}' at " . ($row + 1) . " while not call some methods for previously Entity '{$previousEntityName}'", code: 409);
+                            throw new \Exception\DSL\Entity\NotSet(message: "Can't define new Entity '{$currentEntityName}' at " . ($row + 1) . " while not call some methods for previously Entity '{$previousEntityName}'", code: 409);
                         }
 
                         $entityInstructions[] = [
@@ -70,7 +70,7 @@ final class Lexer {
 
                     continue;
                 } else if ($row === 0) {
-                    throw new \Exception(message: "Don't defined Entity");
+                    throw new \Exception\DSL\Entity\NotSet(message: "Don't defined Entity");
                 }
 
 
@@ -103,33 +103,33 @@ final class Lexer {
                         };
 
                         if ($exception !== null) {
-                            throw new \Exception(message: "Cannot start expression with {$exception}", code: 400);
+                            throw new \Exception\DSL\InstructionsFile\ParseFail\SyntaxError(message: "Cannot start line with {$exception}", code: 400);
                         }
                     }
 
                     if ($current === static::TOKEN_PARAMETERS_START && $isParameterStringParsingProcess === false && $isParametersParsingProcess === true) {
-                        throw new \Exception("Unexpected TOKEN_INPUT_START at {$currentPosition}");
+                        throw new \Exception\DSL\InstructionsFile\ParseFail\SyntaxError("Unexpected TOKEN_INPUT_START at {$currentPosition}");
                     } else if ($current === static::TOKEN_PARAMETERS_END && $isParametersParsingProcess === false) {
-                        throw new \Exception(message: "Unexpected TOKEN_INPUT_END at {$currentPosition}", code: 400);
+                        throw new \Exception\DSL\InstructionsFile\ParseFail\SyntaxError(message: "Unexpected TOKEN_INPUT_END at {$currentPosition}", code: 400);
                     }
 
                     if ($next === null) {
                         if ($isParameterStringParsingProcess === true) { // Parsing params sting
-                            throw new \Exception(message: "Unexpected end of parameters while parsing string. String started at " . ($row + 1) . ":" . $stringStartPosition, code: 400);
+                            throw new \Exception\DSL\InstructionsFile\ParseFail\SyntaxError(message: "Unexpected end of parameters while parsing string. String started at " . ($row + 1) . ":" . $stringStartPosition, code: 400);
                         }
                         if ($current !== static::TOKEN_PARAMETERS_END) { // Params list brace doesn't close
-                            throw new \Exception(message: "Reached end of parameters string without parameter list at {$currentPosition} ", code: 400);
+                            throw new \Exception\DSL\InstructionsFile\ParseFail\SyntaxError(message: "Reached end of parameters string without parameter list at {$currentPosition} ", code: 400);
                         }
                     }
 
                     if ($current === static::TOKEN_STRING_ESCAPE) {
                         if ($isParameterStringParsingProcess && $next !== null) {
                             if (in_array($next, static::VALID_ESCAPE_CHARACTERS) === false) {
-                                throw new \Exception(message: "Invalid string escape sequence at {$currentPosition}" . " (\"{$next}\")", code: 400);
+                                throw new \Exception\DSL\InstructionsFile\ParseFail\SyntaxError(message: "Invalid string escape sequence at {$currentPosition}" . " (\"{$next}\")", code: 400);
                             }
 
                             if ($column + 2 >= $inputLength) {
-                                throw new \Exception(message: "Unexpected end of parameters while parsing string. String started at " . ($row + 1) . ":" . $stringStartPosition, code: 400);
+                                throw new \Exception\DSL\InstructionsFile\ParseFail\SyntaxError(message: "Unexpected end of parameters while parsing string. String started at " . ($row + 1) . ":" . $stringStartPosition, code: 400);
                             }
 
                             $currentPart .= $next;
@@ -199,7 +199,7 @@ final class Lexer {
                         }
 
                         if ($isParametersParsingProcess === false) {
-                            throw new \Exception(message: "Unexpected TOKEN_INPUT_DELIMITER outside of parameter list at {$currentPosition}", code: 400);
+                            throw new \Exception\DSL\InstructionsFile\ParseFail\SyntaxError(message: "Unexpected TOKEN_INPUT_DELIMITER outside of parameter list at {$currentPosition}", code: 400);
                         }
 
                         $instructionParameters[] = $currentPart;
@@ -213,9 +213,8 @@ final class Lexer {
                         }
 
                         $currentPart = trim($currentPart);
-                        // TODO: check method on exists on defined Entity
-                        if (\DSL\Entity\Pool::Instance()->isDefinedEntityMethod($currentEntityName,$currentPart) === false) {
-                            throw new \Exception\DSL\Operation\Unknown("'{$currentPart}' at " . ($row + 1) . " line");
+                        if (\DSL\Entity\Pool::Instance()->isDefinedEntityMethod($currentEntityName, $currentPart) === false) {
+                            throw new \Exception\DSL\Entity\Unknown("'{$currentPart}' at " . ($row + 1) . " line");
                         }
                         $operationName = $currentPart;
 
@@ -230,7 +229,7 @@ final class Lexer {
                 }
             }
             if (count($instructions) === 0) {
-                throw new \Exception(message: "Can't define new Entity '{$currentEntityName}' at " . ($row + 1) . " with no some method calls", code: 409);
+                throw new \Exception\DSL\InstructionsFile\ParseFail\NotSetEntity(message: "Can't define new Entity '{$currentEntityName}' at " . ($row + 1) . " with no some method calls", code: 409);
             }
 
             $entityInstructions[] = [
@@ -238,13 +237,8 @@ final class Lexer {
                 "methods" => $instructions,
             ];
         } catch (\Exception $e) {
-            echo "> FAIL: {$e->getMessage()}\n";
-            exit();
             throw new \Exception\DSL\InstructionsFile\ParseFail(message: "Parse failed", previous: $e);
         }
-
-        var_export($entityInstructions);
-        exit();
 
         return $entityInstructions;
     }
