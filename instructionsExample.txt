@@ -1,6 +1,6 @@
 #SimpleCalculator
 plus(123)
-    minus(1)
+minus(1)
 #SimpleCalculator
 plus(2)
 pow(3)
